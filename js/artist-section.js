@@ -1,4 +1,3 @@
-
 const API_URL = 'https://sound-wave.b.goit.study/api';
 // Початкове зміщення для завантаження даних (тепер для клієнтської пагінації)
 let offset = 0;
