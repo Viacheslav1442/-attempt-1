@@ -198,3 +198,4 @@ function initArtistSection() {
 
 // Експортуємо функцію ініціалізації для використання в main.js
 export { initArtistSection };
+
