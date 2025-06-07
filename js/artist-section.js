@@ -1,3 +1,4 @@
+
 const API_URL = 'https://sound-wave.b.goit.study/api';
 // Початкове зміщення для завантаження даних (тепер для клієнтської пагінації)
 let offset = 0;
@@ -61,6 +62,7 @@ function createCard(artist) {
 
 /**
  * Відображає модальне вікно з детальною інформацією про виконавця.
+ * Ця функція повністю уникає innerHTML для очищення та додавання контенту.
  * @param {object} artist - Об'єкт з даними виконавця для відображення.
  */
 function showModal(artist) {
@@ -107,12 +109,14 @@ async function loadArtists() {
     try {
         if (offset === 0) { // Виконуємо запит до API тільки при першому завантаженні
             console.log(`Sending initial request to: ${API_URL}/artists`);
-            const response = await axios.get(`${API_URL}/artists`); // Запит без параметрів offset/limit
-            const data = response.data; // Отримуємо всі дані
+            const response = await axios.get(`${API_URL}/artists`);
+
+            // КЛЮЧОВА ЗМІНА: Доступ до масиву артистів через .artists
+            const data = response.data.artists;
 
             // Перевіряємо, чи отримані дані є масивом
             if (!Array.isArray(data)) {
-                console.error('API response is not an array:', data);
+                console.error('API response is not an array (after accessing .artists):', data);
                 loadMoreBtn.style.display = 'none';
                 return;
             }
