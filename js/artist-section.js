@@ -1,8 +1,10 @@
 const API_URL = 'https://sound-wave.b.goit.study/api';
-// Початкове зміщення для завантаження даних
+// Початкове зміщення для завантаження даних (тепер для клієнтської пагінації)
 let offset = 0;
-// Кількість елементів, що завантажуються за один раз
+// Кількість елементів, що відображаються за один раз
 const limit = 8;
+// Масив для зберігання всіх завантажених артистів з API
+let allArtists = [];
 
 // Отримання посилань на елементи DOM за їх ID
 const artistsContainer = document.getElementById('artistsContainer');
@@ -64,44 +66,67 @@ window.onclick = (e) => {
 };
 
 /**
- * Асинхронна функція для завантаження артистів з API.
- * Вона додає нові картки до контейнера та керує видимістю кнопки "Load More".
+ * Асинхронна функція для завантаження артистів з API та відображення їх.
+ * Тепер API викликається лише один раз, а пагінація відбувається на клієнтській стороні.
  */
 async function loadArtists() {
     try {
-        // Логуємо URL запиту для відладки
-        console.log(`Requesting: ${API_URL}/artists`);
-        // Виконуємо GET-запит до API без параметрів offset та limit
-        const response = await axios.get(`${API_URL}/artists`);
-        const data = response.data; // Отримуємо масив даних артистів з відповіді
+        if (offset === 0) { // Виконуємо запит до API тільки при першому завантаженні
+            console.log(`Sending initial request to: ${API_URL}/artists`);
+            const response = await axios.get(`${API_URL}/artists`); // Запит без параметрів offset/limit
+            const data = response.data; // Отримуємо всі дані
 
-        // Перевіряємо, чи отримані дані є масивом
-        if (!Array.isArray(data)) {
-            console.error('API response is not an array:', data);
-            loadMoreBtn.style.display = 'none'; // Приховуємо кнопку, якщо дані невалідно
-            return;
+            // Перевіряємо, чи отримані дані є масивом
+            if (!Array.isArray(data)) {
+                console.error('API response is not an array:', data);
+                loadMoreBtn.style.display = 'none';
+                return;
+            }
+            allArtists = data; // Зберігаємо всіх отриманих артистів
         }
 
+        // Відображаємо артистів з масиву allArtists, використовуючи slice для пагінації на клієнті
+        const artistsToDisplay = allArtists.slice(offset, offset + limit);
+
         // Додаємо кожну картку артиста до DOM
-        data.forEach((artist) => {
+        artistsToDisplay.forEach((artist) => {
             const card = createCard(artist);
             artistsContainer.appendChild(card);
         });
 
-        // Оскільки параметри пагінації прибрані, кнопка "Load More" буде прихована або не буде працювати
-        // Якщо API повертає всі дані одразу, loadMoreBtn можна приховати
-        loadMoreBtn.style.display = 'none'; // Приховую кнопку, оскільки пагінація тимчасово відключена
+        // Збільшуємо зміщення для наступної порції
+        offset += limit;
+
+        // Приховуємо кнопку "Load More", якщо всі артисти були відображені
+        if (offset >= allArtists.length) {
+            loadMoreBtn.style.display = 'none';
+        } else {
+            loadMoreBtn.style.display = 'block'; // Робимо кнопку видимою, якщо є ще артисти
+        }
 
     } catch (error) {
-        // Обробка помилок Axios (наприклад, помилки мережі, відповіді сервера з помилками)
         console.error('Axios error during artist loading:', error);
-        // Приховуємо кнопку при помилці, щоб уникнути нескінченних спроб
-        loadMoreBtn.style.display = 'none';
+
+        // Логуємо деталі відповіді на помилку, якщо вони доступні
+        if (error.response) {
+            console.error('API Error Response Details:');
+            console.error('Status:', error.response.status);
+            console.error('Data:', error.response.data);
+            console.error('Headers:', error.response.headers);
+        } else if (error.request) {
+            // Запит був зроблений, але відповіді не було отримано
+            console.error('No response received from API for the request.');
+        } else {
+            // Щось пішло не так при налаштуванні запиту
+            console.error('Error setting up the request:', error.message);
+        }
+
+        loadMoreBtn.style.display = 'none'; // Приховуємо кнопку при помилці
     }
 }
 
 // Прив'язуємо функцію loadArtists до події 'click' на кнопці "Load More"
-// loadMoreBtn.onclick = loadArtists; // Закоментовано, оскільки пагінація тимчасово відключена
+loadMoreBtn.onclick = loadArtists;
 
 // Завантажуємо першу порцію артистів при завантаженні сторінки
 loadArtists();
