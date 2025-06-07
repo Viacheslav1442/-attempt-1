@@ -25,8 +25,9 @@ function createCard(artist) {
     card.className = 'artist-card';
 
     const img = document.createElement('img');
-    img.src = artist.photo;
-    img.alt = artist.name;
+    // ВИПРАВЛЕНО: Використовуємо artist.strArtistThumb для фото
+    img.src = artist.strArtistThumb;
+    img.alt = artist.strArtist; // ВИПРАВЛЕНО: Використовуємо artist.strArtist для alt тексту
     img.addEventListener('error', function () {
         this.src = 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
         this.alt = 'No Image Available';
@@ -34,7 +35,7 @@ function createCard(artist) {
     card.appendChild(img);
 
     const h3 = document.createElement('h3');
-    h3.textContent = artist.name;
+    h3.textContent = artist.strArtist; // ВИПРАВЛЕНО: Використовуємо artist.strArtist для імені
     card.appendChild(h3);
 
     const genresP = document.createElement('p');
@@ -45,7 +46,8 @@ function createCard(artist) {
     card.appendChild(genresP);
 
     const shortInfoP = document.createElement('p');
-    shortInfoP.textContent = artist.shortInfo || 'No short info available.';
+    // ВИПРАВЛЕНО: Використовуємо artist.strBiographyEN для короткого опису
+    shortInfoP.textContent = artist.strBiographyEN || 'No short info available.';
     card.appendChild(shortInfoP);
 
     const learnMoreButton = document.createElement('button');
@@ -71,7 +73,7 @@ function showModal(artist) {
     }
 
     const modalTitle = document.createElement('h2');
-    modalTitle.textContent = artist.name;
+    modalTitle.textContent = artist.strArtist; // ВИПРАВЛЕНО: Використовуємо artist.strArtist для імені
     modalContent.appendChild(modalTitle);
 
     const genresP = document.createElement('p');
@@ -82,11 +84,24 @@ function showModal(artist) {
     modalContent.appendChild(genresP);
 
     const descriptionP = document.createElement('p');
-    descriptionP.textContent = artist.description || 'No detailed description available.';
+    // ВИПРАВЛЕНО: Використовуємо artist.strBiographyEN для повного опису в модальному вікні
+    descriptionP.textContent = artist.strBiographyEN || 'No detailed description available.';
     modalContent.appendChild(descriptionP);
 
     modal.style.display = 'flex'; // Робимо модальне вікно видимим
 }
+
+// Обробник події для кнопки закриття модального вікна ('x')
+closeModal.onclick = () => {
+    modal.style.display = 'none'; // Приховуємо модальне вікно
+};
+
+// Обробник події для закриття модального вікна при кліку поза його межами
+window.onclick = (e) => {
+    if (e.target === modal) {
+        modal.style.display = 'none'; // Приховуємо модальне вікно
+    }
+};
 
 /**
  * Асинхронна функція для завантаження артистів з API та відображення їх.
@@ -96,7 +111,6 @@ async function loadArtistsDataAndDisplay() {
     try {
         if (offset === 0) { // Виконуємо запит до API тільки при першому завантаженні
             console.log(`Sending initial request to: ${API_URL}/artists`);
-            // *** КЛЮЧОВЕ ВИПРАВЛЕННЯ: ЗАПИТ БЕЗ ПАРАМЕТРІВ OFFSET/LIMIT ***
             const response = await axios.get(`${API_URL}/artists`);
 
             // Доступ до масиву артистів через .artists
