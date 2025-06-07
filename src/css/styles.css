@@ -6,6 +6,5 @@
 */
 /* Common styles */
 
-@import url('./base.css');
 @import url('./container.css');
 @import url('./artist-section.css');
