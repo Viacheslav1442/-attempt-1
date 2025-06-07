@@ -10,13 +10,18 @@ let modal;
 let modalContent;
 let closeModal;
 
+function getGenres(artist) {
+    // Підтримка fallback для API TheAudioDB
+    return artist.strGenre || artist.strStyle || artist.strMood || 'N/A';
+}
+
 function createCard(artist) {
     const card = document.createElement('div');
     card.className = 'artist-card';
 
     const img = document.createElement('img');
-    img.src = artist.strArtistThumb;
-    img.alt = artist.strArtist;
+    img.src = artist.strArtistThumb || 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
+    img.alt = artist.strArtist || 'No Image';
     img.addEventListener('error', function () {
         this.src = 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
         this.alt = 'No Image Available';
@@ -24,14 +29,14 @@ function createCard(artist) {
     card.appendChild(img);
 
     const h3 = document.createElement('h3');
-    h3.textContent = artist.strArtist;
+    h3.textContent = artist.strArtist || 'Unknown Artist';
     card.appendChild(h3);
 
     const genresP = document.createElement('p');
     const genresStrong = document.createElement('strong');
     genresStrong.textContent = 'Genres: ';
     genresP.appendChild(genresStrong);
-    genresP.append(artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A');
+    genresP.append(getGenres(artist));
     card.appendChild(genresP);
 
     const shortInfoP = document.createElement('p');
@@ -50,19 +55,17 @@ function createCard(artist) {
 }
 
 function showModal(artist) {
-    while (modalContent.firstChild) {
-        modalContent.removeChild(modalContent.firstChild);
-    }
+    modalContent.innerHTML = '';
 
     const modalTitle = document.createElement('h2');
-    modalTitle.textContent = artist.strArtist;
+    modalTitle.textContent = artist.strArtist || 'Unknown Artist';
     modalContent.appendChild(modalTitle);
 
     const genresP = document.createElement('p');
     const genresStrong = document.createElement('strong');
     genresStrong.textContent = 'Genres: ';
     genresP.appendChild(genresStrong);
-    genresP.append(artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A');
+    genresP.append(getGenres(artist));
     modalContent.appendChild(genresP);
 
     const descriptionP = document.createElement('p');
@@ -80,11 +83,16 @@ async function loadArtistsDataAndDisplay() {
             const data = response.data.artists;
 
             if (!Array.isArray(data)) {
-                console.error('API response is not an array (after accessing .artists):', data);
+                console.error('API response is not an array:', data);
                 loadMoreBtn.style.display = 'none';
                 return;
             }
             allArtists = data;
+        }
+
+        if (offset >= allArtists.length) {
+            loadMoreBtn.style.display = 'none';
+            return;
         }
 
         const artistsToDisplay = allArtists.slice(offset, offset + limit);
@@ -95,17 +103,12 @@ async function loadArtistsDataAndDisplay() {
 
         offset += limit;
 
-        if (offset >= allArtists.length) {
-            loadMoreBtn.style.display = 'none';
-        } else {
-            loadMoreBtn.style.display = 'block';
-        }
+        loadMoreBtn.style.display = offset < allArtists.length ? 'block' : 'none';
 
     } catch (error) {
         console.error('Axios error during artist loading:', error);
 
         if (axios.isAxiosError(error) && error.response) {
-            console.error('API Error Response Details:');
             console.error('Status:', error.response.status);
             console.error('Data:', error.response.data);
             console.error('Headers:', error.response.headers);
