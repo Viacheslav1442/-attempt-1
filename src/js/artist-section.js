@@ -96,6 +96,7 @@ async function loadArtistsDataAndDisplay() {
     try {
         if (offset === 0) { // Виконуємо запит до API тільки при першому завантаженні
             console.log(`Sending initial request to: ${API_URL}/artists`);
+            // *** КЛЮЧОВЕ ВИПРАВЛЕННЯ: ЗАПИТ БЕЗ ПАРАМЕТРІВ OFFSET/LIMIT ***
             const response = await axios.get(`${API_URL}/artists`);
 
             // Доступ до масиву артистів через .artists
