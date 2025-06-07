@@ -1,4 +1,4 @@
-import { initArtistSection } from './artist-section.js';
+import { initArtistSection } from './js/artist-section.js'
 
 // Чекаємо, доки DOM буде повністю завантажений, перш ніж ініціалізувати додаток
 document.addEventListener('DOMContentLoaded', () => {
