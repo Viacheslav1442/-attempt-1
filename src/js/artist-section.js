@@ -93,8 +93,8 @@ function showModal(artist) {
 async function loadArtistsDataAndDisplay() {
     try {
         if (offset === 0) {
-            console.log('Sending initial request to: ${ API_URL } / artists');
-            const response = await axios.get('${ API_URL } / artists');
+            console.log(`Sending initial request to: ${API_URL}/artists`);
+            const response = await axios.get(`${API_URL}/artists`);
             const data = response.data.artists;
 
             if (!Array.isArray(data)) {

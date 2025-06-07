@@ -17,15 +17,7 @@ h2 {
 
 }
 
-.artist-description {
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-height: 7.5em;
-    /* 1.5em x 5 lines */
-}
+
 
 .artist-card {
     border: 1px solid #ddd;
@@ -86,26 +78,91 @@ h2 {
 }
 
 /* Десктоп (1440px і більше) */
-@media (min-width: 1440px) {
-    .artists-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
+body {
+    font-family: Arial, sans-serif;
+    padding: 64px;
 }
 
-/* Планшет (до 768px) */
+h1,
+h2 {
+    text-align: left;
+}
+
+.artists-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+}
+
+.artist-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.artist-card img {
+    width: 100%;
+    height: auto;
+    margin-bottom: 12px;
+}
+
+.artist-card h3,
+.artist-card p,
+.artist-card button {
+    text-align: left;
+}
+
+.artist-card p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 32px;
+    max-width: 600px;
+    width: 90%;
+}
+
+.close-btn {
+    float: right;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.load-more {
+    margin-top: 32px;
+    padding: 12px 24px;
+    font-size: 16px;
+}
+
 @media (max-width: 768px) {
-    .artists-grid {
-        grid-template-columns: repeat(2, 1fr);
+    body {
+        padding: 32px;
     }
-}
 
-/* Мобільний (до 320px) */
-@media (max-width: 320px) {
     .artists-grid {
         grid-template-columns: 1fr;
     }
+}
 
-    .modal-content {
-        width: 95%;
+@media (max-width: 320px) {
+    body {
+        padding: 16px;
     }
 }
