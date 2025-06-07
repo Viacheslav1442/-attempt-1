@@ -10,22 +10,7 @@ let modal;
 let modalContent;
 let closeModal;
 
-/**
- * Truncates text to a maximum number of lines.
- *
- * @param {string} text - The text to truncate.
- * @param {number} maxLines - The maximum number of lines to display.
- * @returns {string} The truncated text, or the original text if it's within the limit.
- */
-function truncateText(text, maxLines = 5) {
-    const lines = text.split('\n');
-    return lines.length > maxLines
-        ? lines.slice(0, maxLines).join('\n') + '...'
-        : text;
-}
-
 function getGenres(artist) {
-    // Підтримка fallback для API TheAudioDB
     return artist.strGenre || artist.strStyle || artist.strMood || 'N/A';
 }
 
@@ -54,8 +39,8 @@ function createCard(artist) {
     card.appendChild(genresP);
 
     const shortInfoP = document.createElement('p');
-    // Apply truncateText here
-    shortInfoP.textContent = truncateText(artist.strBiographyEN || 'No short info available.');
+    shortInfoP.className = 'artist-description';
+    shortInfoP.textContent = artist.strBiographyEN || 'No short info available.';
     card.appendChild(shortInfoP);
 
     const learnMoreButton = document.createElement('button');
