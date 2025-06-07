@@ -15,27 +15,46 @@ const closeModal = document.getElementById('closeModal');
 
 /**
  * Створює та повертає DOM-елемент картки виконавця.
- * Ця функція використовує addEventListener замість inline 'onclick' для обробки подій.
+ * Ця функція повністю уникає використання innerHTML для динамічного контенту,
+ * створюючи всі елементи програмно.
  * @param {object} artist - Об'єкт з даними виконавця (фото, ім'я, жанри, коротка інформація, опис).
  * @returns {HTMLElement} - Створений елемент 'div' для картки.
  */
 function createCard(artist) {
     const card = document.createElement('div');
     card.className = 'artist-card';
-    card.innerHTML = `
-        <img src="${artist.photo}" onerror="this.onerror=null;this.src='https://placehold.co/150x150/cccccc/333333?text=No+Image';" alt="${artist.name}" />
-        <h3>${artist.name}</h3>
-        <p><strong>Genres:</strong> ${artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A'}</p>
-        <p>${artist.shortInfo || 'No short info available.'}</p>
-        <button class="learn-more-btn">Learn More</button>
-    `;
 
-    // Знаходимо кнопку "Learn More" всередині щойно створеної картки
-    const learnMoreButton = card.querySelector('.learn-more-btn');
-    // Додаємо обробник події 'click' до цієї кнопки програмно
-    learnMoreButton.addEventListener('click', () => {
-        showModal(artist); // Викликаємо функцію showModal, передаючи об'єкт артиста
+    const img = document.createElement('img');
+    img.src = artist.photo;
+    img.alt = artist.name;
+    img.addEventListener('error', function () {
+        this.src = 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
+        this.alt = 'No Image Available';
     });
+    card.appendChild(img);
+
+    const h3 = document.createElement('h3');
+    h3.textContent = artist.name;
+    card.appendChild(h3);
+
+    const genresP = document.createElement('p');
+    const genresStrong = document.createElement('strong');
+    genresStrong.textContent = 'Genres: ';
+    genresP.appendChild(genresStrong);
+    genresP.append(artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A');
+    card.appendChild(genresP);
+
+    const shortInfoP = document.createElement('p');
+    shortInfoP.textContent = artist.shortInfo || 'No short info available.';
+    card.appendChild(shortInfoP);
+
+    const learnMoreButton = document.createElement('button');
+    learnMoreButton.className = 'learn-more-btn';
+    learnMoreButton.textContent = 'Learn More';
+    learnMoreButton.addEventListener('click', () => {
+        showModal(artist);
+    });
+    card.appendChild(learnMoreButton);
 
     return card;
 }
@@ -45,11 +64,26 @@ function createCard(artist) {
  * @param {object} artist - Об'єкт з даними виконавця для відображення.
  */
 function showModal(artist) {
-    modalContent.innerHTML = `
-        <h2>${artist.name}</h2>
-        <p><strong>Genres:</strong> ${artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A'}</p>
-        <p>${artist.description || 'No detailed description available.'}</p>
-    `;
+    // Очищаємо вміст перед додаванням нового, повністю уникаючи innerHTML
+    while (modalContent.firstChild) {
+        modalContent.removeChild(modalContent.firstChild);
+    }
+
+    const modalTitle = document.createElement('h2');
+    modalTitle.textContent = artist.name;
+    modalContent.appendChild(modalTitle);
+
+    const genresP = document.createElement('p');
+    const genresStrong = document.createElement('strong');
+    genresStrong.textContent = 'Genres: ';
+    genresP.appendChild(genresStrong);
+    genresP.append(artist.genres && artist.genres.length > 0 ? artist.genres.join(', ') : 'N/A');
+    modalContent.appendChild(genresP);
+
+    const descriptionP = document.createElement('p');
+    descriptionP.textContent = artist.description || 'No detailed description available.';
+    modalContent.appendChild(descriptionP);
+
     modal.style.display = 'flex'; // Робимо модальне вікно видимим
 }
 
@@ -108,7 +142,7 @@ async function loadArtists() {
         console.error('Axios error during artist loading:', error);
 
         // Логуємо деталі відповіді на помилку, якщо вони доступні
-        if (error.response) {
+        if (axios.isAxiosError(error) && error.response) {
             console.error('API Error Response Details:');
             console.error('Status:', error.response.status);
             console.error('Data:', error.response.data);
