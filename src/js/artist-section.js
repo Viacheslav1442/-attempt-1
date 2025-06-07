@@ -1,3 +1,4 @@
+import axios from 'axios';
 const API_URL = 'https://sound-wave.b.goit.study/api';
 let offset = 0;
 const limit = 8;
