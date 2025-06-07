@@ -1,17 +1,17 @@
 const API_URL = 'https://sound-wave.b.goit.study/api';
-// Початкове зміщення для завантаження даних (тепер для клієнтської пагінації)
+// Початкове зміщення для завантаження даних (для клієнтської пагінації)
 let offset = 0;
 // Кількість елементів, що відображаються за один раз
 const limit = 8;
 // Масив для зберігання всіх завантажених артистів з API
 let allArtists = [];
 
-// Отримання посилань на елементи DOM за їх ID
-const artistsContainer = document.getElementById('artistsContainer');
-const loadMoreBtn = document.getElementById('loadMoreBtn');
-const modal = document.getElementById('modal');
-const modalContent = document.getElementById('modalContent');
-const closeModal = document.getElementById('closeModal');
+// Посилання на елементи DOM (будуть ініціалізовані в initArtistSection)
+let artistsContainer;
+let loadMoreBtn;
+let modal;
+let modalContent;
+let closeModal;
 
 /**
  * Створює та повертає DOM-елемент картки виконавця.
@@ -88,29 +88,17 @@ function showModal(artist) {
     modal.style.display = 'flex'; // Робимо модальне вікно видимим
 }
 
-// Обробник події для кнопки закриття модального вікна ('x')
-closeModal.onclick = () => {
-    modal.style.display = 'none'; // Приховуємо модальне вікно
-};
-
-// Обробник події для закриття модального вікна при кліку поза його межами
-window.onclick = (e) => {
-    if (e.target === modal) {
-        modal.style.display = 'none'; // Приховуємо модальне вікно
-    }
-};
-
 /**
  * Асинхронна функція для завантаження артистів з API та відображення їх.
  * Тепер API викликається лише один раз, а пагінація відбувається на клієнтській стороні.
  */
-async function loadArtists() {
+async function loadArtistsDataAndDisplay() {
     try {
         if (offset === 0) { // Виконуємо запит до API тільки при першому завантаженні
             console.log(`Sending initial request to: ${API_URL}/artists`);
             const response = await axios.get(`${API_URL}/artists`);
 
-            // КЛЮЧОВА ЗМІНА: Доступ до масиву артистів через .artists
+            // Доступ до масиву артистів через .artists
             const data = response.data.artists;
 
             // Перевіряємо, чи отримані дані є масивом
@@ -162,8 +150,36 @@ async function loadArtists() {
     }
 }
 
-// Прив'язуємо функцію loadArtists до події 'click' на кнопці "Load More"
-loadMoreBtn.onclick = loadArtists;
+/**
+ * Ініціалізує секцію артистів: отримує елементи DOM та встановлює обробники подій.
+ * Ця функція є точкою входу для модуля.
+ */
+function initArtistSection() {
+    // Отримання посилань на елементи DOM за їх ID
+    artistsContainer = document.getElementById('artistsContainer');
+    loadMoreBtn = document.getElementById('loadMoreBtn');
+    modal = document.getElementById('modal');
+    modalContent = document.getElementById('modalContent');
+    closeModal = document.getElementById('closeModal');
 
-// Завантажуємо першу порцію артистів при завантаженні сторінки
-loadArtists();
+    // Обробник події для кнопки закриття модального вікна ('x')
+    closeModal.onclick = () => {
+        modal.style.display = 'none'; // Приховуємо модальне вікно
+    };
+
+    // Обробник події для закриття модального вікна при кліку поза його межами
+    window.onclick = (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none'; // Приховуємо модальне вікно
+        }
+    };
+
+    // Прив'язуємо функцію loadArtistsDataAndDisplay до події 'click' на кнопці "Load More"
+    loadMoreBtn.onclick = loadArtistsDataAndDisplay;
+
+    // Завантажуємо першу порцію артистів при завантаженні сторінки
+    loadArtistsDataAndDisplay();
+}
+
+// Експортуємо функцію ініціалізації для використання в main.js
+export { initArtistSection };
