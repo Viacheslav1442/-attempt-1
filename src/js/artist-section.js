@@ -11,7 +11,17 @@ let modalContent;
 let closeModal;
 
 function getGenres(artist) {
-    return artist.strGenre || artist.strStyle || artist.strMood || 'N/A';
+    const genres = [
+        artist.strGenre,
+        artist.strStyle,
+        artist.strMood,
+        artist.strGenre2,
+        artist.strGenre3,
+        artist.strMood2,
+        artist.strMood3
+    ].filter(Boolean);
+
+    return genres.length > 0 ? genres.join(', ') : 'N/A';
 }
 
 function createCard(artist) {
