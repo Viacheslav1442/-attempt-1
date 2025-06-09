@@ -96,11 +96,6 @@ async function loadArtistsDataAndDisplay() {
             allArtists = artistsArray;
         }
 
-        if (offset >= allArtists.length) {
-            loadMoreBtn?.classList.add('hidden');
-            return;
-        }
-
         const artistsToDisplay = allArtists.slice(offset, offset + limit);
         artistsToDisplay.forEach(artist => {
             const card = createCard(artist);
@@ -109,6 +104,7 @@ async function loadArtistsDataAndDisplay() {
 
         offset += limit;
 
+        // 🔽 Тут основна перевірка, чи залишилися ще артисти
         if (offset >= allArtists.length) {
             loadMoreBtn?.classList.add('hidden');
         } else {
