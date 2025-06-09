@@ -1,8 +1,7 @@
 import axios from 'axios';
 
-
 const api = axios.create({
-    baseURL: 'https://sound-wave.b.goit.study/api-docs/', // 
+    baseURL: 'https://sound-wave.b.goit.study/api',
     timeout: 5000,
     headers: {
         'Content-Type': 'application/json',
@@ -14,13 +13,8 @@ const api = axios.create({
  * @returns {Promise<Array>} масив артистів
  */
 export async function fetchArtists() {
-    try {
-        const response = await api.get('/artists');
-        return response.data;
-    } catch (error) {
-        console.error('❌ Помилка при отриманні артистів:', error);
-        throw error;
-    }
+    const response = await api.get('/artists');
+    return response.data.artists;
 }
 
 /**
@@ -29,13 +23,8 @@ export async function fetchArtists() {
  * @returns {Promise<Object>} дані артиста
  */
 export async function fetchArtistById(id) {
-    try {
-        const response = await api.get(`/artists/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error(`❌ Помилка при отриманні артиста з ID = ${id}:`, error);
-        throw error;
-    }
+    const response = await api.get(`/artists/${id}`);
+    return response.data;
 }
 
 /**
@@ -43,11 +32,6 @@ export async function fetchArtistById(id) {
  * @returns {Promise<Array>} масив відгуків
  */
 export async function fetchReviews() {
-    try {
-        const response = await api.get('/reviews');
-        return response.data;
-    } catch (error) {
-        console.error('❌ Помилка при отриманні відгуків:', error);
-        throw error;
-    }
+    const response = await api.get('/reviews');
+    return response.data.reviews;
 }
