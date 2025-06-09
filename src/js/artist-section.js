@@ -7,6 +7,16 @@ let allArtists = [];
 let artistsContainer;
 let loadMoreBtn;
 
+function showLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) loader.classList.remove('hidden');
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    if (loader) loader.classList.add('hidden');
+}
+
 function getGenres(artist) {
     const genres = [
         artist.strGenre,
@@ -58,7 +68,7 @@ function createCard(artist) {
     const learnMoreButton = document.createElement('button');
     learnMoreButton.className = 'learn-more-btn';
     learnMoreButton.textContent = 'Learn More';
-    learnMoreButton.dataset.artistId = artist.idArtist; // айді передається
+    learnMoreButton.dataset.artistId = artist.idArtist;
     card.appendChild(learnMoreButton);
 
     return card;
@@ -66,12 +76,12 @@ function createCard(artist) {
 
 async function loadArtistsDataAndDisplay() {
     try {
+        showLoader();
+
         if (offset === 0) {
-            // console.log(`Sending initial request for artists`);
             const data = await fetchArtists();
 
             if (!Array.isArray(data)) {
-                // console.error('API response is not an array:', data);
                 alert('Error: Received invalid data from server.');
                 loadMoreBtn?.classList.add('hidden');
                 return;
@@ -98,9 +108,10 @@ async function loadArtistsDataAndDisplay() {
             loadMoreBtn?.classList.remove('hidden');
         }
     } catch (error) {
-        // console.error('Error loading artists:', error);
         alert('Failed to load artists. Please try again later.');
         loadMoreBtn?.classList.add('hidden');
+    } finally {
+        hideLoader();
     }
 }
 
