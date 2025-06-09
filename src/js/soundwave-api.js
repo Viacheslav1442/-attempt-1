@@ -1,29 +1,21 @@
 import axios from 'axios';
-import iziToast from 'izitoast';
-import 'izitoast/dist/css/iziToast.min.css';
 
 const api = axios.create({
-  baseURL: 'https://sound-wave.b.goit.study/api-docs/',
+  baseURL: 'https://sound-wave.b.goit.study/api',
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-
 api.interceptors.response.use(
   response => response,
   error => {
-    iziToast.error({
-      title: 'Помилка',
-      message: 'Сталася помилка при запиті до сервера. Спробуйте ще раз.',
-      position: 'topRight',
-    });
+    // iziToast.error або alert на вибір
+    alert('Сталася помилка при запиті до сервера. Спробуйте ще раз.');
     return Promise.reject(error);
   }
 );
-
-// Функції запитів
 
 export async function fetchArtists() {
   try {

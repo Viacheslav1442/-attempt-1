@@ -1,4 +1,4 @@
-import { fetchArtists } from './soundwave-api.js'; // імпортується лише fetchArtists
+import { fetchArtists } from './soundwave-api.js';
 
 let offset = 0;
 const limit = 8;
@@ -81,13 +81,19 @@ async function loadArtistsDataAndDisplay() {
         if (offset === 0) {
             const data = await fetchArtists();
 
-            if (!Array.isArray(data)) {
+            const artistsArray = Array.isArray(data)
+                ? data
+                : Array.isArray(data.artists)
+                    ? data.artists
+                    : null;
+
+            if (!artistsArray) {
                 alert('Error: Received invalid data from server.');
                 loadMoreBtn?.classList.add('hidden');
                 return;
             }
 
-            allArtists = data;
+            allArtists = artistsArray;
         }
 
         if (offset >= allArtists.length) {
@@ -96,12 +102,13 @@ async function loadArtistsDataAndDisplay() {
         }
 
         const artistsToDisplay = allArtists.slice(offset, offset + limit);
-        artistsToDisplay.forEach((artist) => {
+        artistsToDisplay.forEach(artist => {
             const card = createCard(artist);
             artistsContainer.appendChild(card);
         });
 
         offset += limit;
+
         if (offset >= allArtists.length) {
             loadMoreBtn?.classList.add('hidden');
         } else {
