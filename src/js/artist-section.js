@@ -31,8 +31,10 @@ function createCard(artist) {
         'https://placehold.co/150x150/cccccc/333333?text=No+Image';
     img.alt = artist.strArtist || 'No Image';
     img.addEventListener('error', function () {
-        this.src = 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
-        this.alt = 'No Image Available';
+        if (!this.src.includes('placehold.co')) {
+            this.src = 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
+            this.alt = 'No Image Available';
+        }
     });
     card.appendChild(img);
 
@@ -49,8 +51,8 @@ function createCard(artist) {
 
     const shortInfoP = document.createElement('p');
     shortInfoP.className = 'artist-description';
-    shortInfoP.textContent =
-        artist.strBiographyEN || 'No short info available.';
+    const bio = artist.strBiographyEN || 'No short info available.';
+    shortInfoP.textContent = bio.length > 200 ? bio.slice(0, 200) + '...' : bio;
     card.appendChild(shortInfoP);
 
     const learnMoreButton = document.createElement('button');
@@ -71,7 +73,7 @@ async function loadArtistsDataAndDisplay() {
             if (!Array.isArray(data)) {
                 // console.error('API response is not an array:', data);
                 alert('Error: Received invalid data from server.');
-                loadMoreBtn.style.display = 'none';
+                loadMoreBtn?.classList.add('hidden');
                 return;
             }
 
@@ -79,7 +81,7 @@ async function loadArtistsDataAndDisplay() {
         }
 
         if (offset >= allArtists.length) {
-            loadMoreBtn.style.display = 'none';
+            loadMoreBtn?.classList.add('hidden');
             return;
         }
 
@@ -90,17 +92,23 @@ async function loadArtistsDataAndDisplay() {
         });
 
         offset += limit;
-        loadMoreBtn.style.display = offset < allArtists.length ? 'block' : 'none';
+        if (offset >= allArtists.length) {
+            loadMoreBtn?.classList.add('hidden');
+        } else {
+            loadMoreBtn?.classList.remove('hidden');
+        }
     } catch (error) {
         // console.error('Error loading artists:', error);
         alert('Failed to load artists. Please try again later.');
-        loadMoreBtn.style.display = 'none';
+        loadMoreBtn?.classList.add('hidden');
     }
 }
 
 function initArtistSection() {
     artistsContainer = document.getElementById('artistsContainer');
     loadMoreBtn = document.getElementById('loadMoreBtn');
+
+    if (!artistsContainer || !loadMoreBtn) return;
 
     loadMoreBtn.onclick = loadArtistsDataAndDisplay;
     loadArtistsDataAndDisplay();
