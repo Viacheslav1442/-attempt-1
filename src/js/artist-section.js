@@ -1,4 +1,4 @@
-import { fetchArtists } from './api.js'; // імпортується лише fetchArtists
+import { fetchArtists } from './soundwave-api.js'; // імпортується лише fetchArtists
 
 let offset = 0;
 const limit = 8;
