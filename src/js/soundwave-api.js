@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 
+
 const api = axios.create({
   baseURL: 'https://sound-wave.b.goit.study/api', // 
   timeout: 5000,
@@ -8,6 +9,17 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+
+function showLoader() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.style.display = 'block';
+}
+
+function hideLoader() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.style.display = 'none';
+}
 
 // ➕ Interceptors — показ лоадера перед запитом
 api.interceptors.request.use(
