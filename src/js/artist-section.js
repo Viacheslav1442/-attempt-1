@@ -1,4 +1,4 @@
-import { fetchArtists } from './soundwave-api.js';
+import { fetchArtists, fetchArtistById } from './soundwave-api.js';
 
 let offset = 0;
 const limit = 8;
@@ -104,7 +104,6 @@ async function loadArtistsDataAndDisplay() {
 
         offset += limit;
 
-        // 🔽 Тут основна перевірка, чи залишилися ще артисти
         if (offset >= allArtists.length) {
             loadMoreBtn?.classList.add('hidden');
         } else {
@@ -118,6 +117,31 @@ async function loadArtistsDataAndDisplay() {
     }
 }
 
+function createModal(artist) {
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+
+    modal.innerHTML = `
+        <button class="modal-close-btn">&times;</button>
+        <h2>${artist.strArtist || 'Unknown Artist'}</h2>
+        <img src="${artist.strArtistThumb || 'https://placehold.co/300x300?text=No+Image'}" alt="${artist.strArtist}" />
+        <p><strong>Genres:</strong> ${getGenres(artist)}</p>
+        <p>${artist.strBiographyEN || 'No biography available.'}</p>
+    `;
+
+    modalOverlay.appendChild(modal);
+    document.body.appendChild(modalOverlay);
+
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close-btn')) {
+            modalOverlay.remove();
+        }
+    });
+}
+
 function initArtistSection() {
     artistsContainer = document.getElementById('artistsContainer');
     loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -126,6 +150,22 @@ function initArtistSection() {
 
     loadMoreBtn.onclick = loadArtistsDataAndDisplay;
     loadArtistsDataAndDisplay();
+
+    artistsContainer.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('learn-more-btn')) {
+            const artistId = e.target.dataset.artistId;
+            try {
+                const artistData = await fetchArtistById(artistId);
+                if (!artistData || !artistData.artists || !artistData.artists[0]) {
+                    alert('Artist details not found.');
+                    return;
+                }
+                createModal(artistData.artists[0]);
+            } catch (error) {
+                alert('Failed to load artist details.');
+            }
+        }
+    });
 }
 
 export { initArtistSection };
