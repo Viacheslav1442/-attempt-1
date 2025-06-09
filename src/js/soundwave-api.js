@@ -1,4 +1,6 @@
 import axios from 'axios';
+import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.min.css';
 
 const api = axios.create({
   baseURL: 'https://sound-wave.b.goit.study/api-docs/',
@@ -8,8 +10,7 @@ const api = axios.create({
   },
 });
 
-// Відповідальність за лоадер — у UI (artists-section.js),
-// тому тут залишаємо лише обробку помилок через iziToast
+
 api.interceptors.response.use(
   response => response,
   error => {
