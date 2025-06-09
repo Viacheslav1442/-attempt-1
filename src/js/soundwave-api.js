@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 const api = axios.create({
-  baseURL: baseURL: 'https://sound-wave.b.goit.study/api', // 
+  baseURL: 'https://sound-wave.b.goit.study/api', // 
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
