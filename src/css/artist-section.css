@@ -5,7 +5,7 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 16px;
-    flex: 1 1 calc(50% - 16px);
+
 }
 
 .artist-card {
@@ -45,6 +45,7 @@
     .artists-grid {
         flex: 1 1 100%;
         gap: 24px;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -53,7 +54,7 @@
 
 
     .artists-grid {
-        flex: 1 1 calc(50% - 16px);
+        grid-template-columns: repeat(2, 1fr);
         gap: 32px;
     }
 
