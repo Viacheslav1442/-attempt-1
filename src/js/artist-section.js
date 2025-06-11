@@ -90,6 +90,7 @@ async function loadArtistsDataAndDisplay() {
             if (!artistsArray) {
                 alert('Error: Received invalid data from server.');
                 loadMoreBtn?.classList.add('hidden');
+                loadMoreBtn?.setAttribute('disabled', true);
                 return;
             }
 
@@ -104,14 +105,19 @@ async function loadArtistsDataAndDisplay() {
 
         offset += limit;
 
+        console.log(`Loaded ${offset} of ${allArtists.length} artists`);
+
         if (offset >= allArtists.length) {
             loadMoreBtn?.classList.add('hidden');
+            loadMoreBtn?.setAttribute('disabled', true);
         } else {
             loadMoreBtn?.classList.remove('hidden');
+            loadMoreBtn?.removeAttribute('disabled');
         }
     } catch (error) {
         alert('Failed to load artists. Please try again later.');
         loadMoreBtn?.classList.add('hidden');
+        loadMoreBtn?.setAttribute('disabled', true);
     } finally {
         hideLoader();
     }
