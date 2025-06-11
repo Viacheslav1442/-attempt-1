@@ -123,31 +123,6 @@ async function loadArtistsDataAndDisplay() {
     }
 }
 
-function createModal(artist) {
-    const modalOverlay = document.createElement('div');
-    modalOverlay.className = 'modal-overlay';
-
-    const modal = document.createElement('div');
-    modal.className = 'modal';
-
-    modal.innerHTML = `
-        <button class="modal-close-btn">&times;</button>
-        <h2>${artist.strArtist || 'Unknown Artist'}</h2>
-        <img src="${artist.strArtistThumb || 'https://placehold.co/300x300?text=No+Image'}" alt="${artist.strArtist}" />
-        <p><strong>Genres:</strong> ${getGenres(artist)}</p>
-        <p>${artist.strBiographyEN || 'No biography available.'}</p>
-    `;
-
-    modalOverlay.appendChild(modal);
-    document.body.appendChild(modalOverlay);
-
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal-overlay') || e.target.classList.contains('modal-close-btn')) {
-            modalOverlay.remove();
-        }
-    });
-}
-
 function initArtistSection() {
     artistsContainer = document.getElementById('artistsContainer');
     loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -166,7 +141,8 @@ function initArtistSection() {
                     alert('Artist details not found.');
                     return;
                 }
-                createModal(artistData.artists[0]);
+                // Тут лишається виклик без створення модалки
+                console.log('Artist details:', artistData.artists[0]);
             } catch (error) {
                 alert('Failed to load artist details.');
             }
