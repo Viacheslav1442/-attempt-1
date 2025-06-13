@@ -1,39 +1,45 @@
-import { fetchArtists, fetchArtistById } from './soundwave-api.js';
+import { fetchArtists } from './soundwave-api.js';
+import { openArtistModal } from './artist-details-modal.js';
 
-let currentPage = 1;
+let offset = 0;
 const limit = 8;
+let allArtists = [];
 
 let artistsContainer;
 let loadMoreBtn;
 
+// ==== LOADER ====
 function showLoader() {
-    const loader = document.getElementById('loader');
-    if (loader) loader.classList.remove('hidden');
+    document.body.classList.add('loading');
 }
 
 function hideLoader() {
-    const loader = document.getElementById('loader');
-    if (loader) loader.classList.add('hidden');
+    document.body.classList.remove('loading');
 }
 
-// Оновлена функція getGenres
+// ==== HELPER ====
+function disableLoadMoreButton() {
+    loadMoreBtn?.classList.add('hidden');
+    loadMoreBtn?.setAttribute('disabled', true);
+}
+
+function enableLoadMoreButton() {
+    loadMoreBtn?.classList.remove('hidden');
+    loadMoreBtn?.removeAttribute('disabled');
+}
+
 function getGenres(artist) {
-    const genres = [
-        artist.strGenre,
-        artist.strStyle,
-        artist.strMood,
-        artist.strGenre2,
-        artist.strGenre3,
-        artist.strMood2,
-        artist.strMood3,
-    ].filter(Boolean);
-
-    return genres.length > 0 ? genres.join(', ') : 'N/A';
+    if (!artist || typeof artist !== 'object') return [];
+    if (Array.isArray(artist.genres) && artist.genres.length > 0) {
+        return artist.genres.filter(Boolean);
+    }
+    return [];
 }
 
-function createCard(artist) {
-    const card = document.createElement('div');
-    card.className = 'artist-card';
+// ==== CARD GENERATION ====
+async function createCard(artist) {
+    const li = document.createElement('li');
+    li.className = 'artist-card';
 
     const img = document.createElement('img');
     img.src =
@@ -41,88 +47,95 @@ function createCard(artist) {
         'https://placehold.co/150x150/cccccc/333333?text=No+Image';
     img.alt = artist.strArtist || 'No Image';
     img.addEventListener('error', function () {
-        if (!this.src.includes('placehold.co')) {
-            this.src = 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
-            this.alt = 'No Image Available';
-        }
+        this.src = 'https://placehold.co/150x150/cccccc/333333?text=No+Image';
+        this.alt = 'No Image Available';
     });
-    card.appendChild(img);
+    li.appendChild(img);
 
     const h3 = document.createElement('h3');
     h3.textContent = artist.strArtist || 'Unknown Artist';
-    card.appendChild(h3);
-
-    const genresP = document.createElement('p');
-    const genresStrong = document.createElement('strong');
-    genresStrong.textContent = 'Genres: ';
-    genresP.appendChild(genresStrong);
-    genresP.append(getGenres(artist));
-    card.appendChild(genresP);
+    li.appendChild(h3);
 
     const shortInfoP = document.createElement('p');
     shortInfoP.className = 'artist-description';
     const bio = artist.strBiographyEN || 'No short info available.';
     shortInfoP.textContent = bio.length > 200 ? bio.slice(0, 200) + '...' : bio;
-    card.appendChild(shortInfoP);
+    li.appendChild(shortInfoP);
+
+    const genresList = getGenres(artist);
+    if (genresList.length > 0) {
+        const ul = document.createElement('ul');
+        ul.classList.add('artist-genres-list');
+        genresList.forEach(genre => {
+            const genreLi = document.createElement('li');
+            genreLi.classList.add('genres-list-item');
+            genreLi.textContent = genre;
+            ul.appendChild(genreLi);
+        });
+        li.appendChild(ul);
+    }
 
     const learnMoreButton = document.createElement('button');
     learnMoreButton.className = 'learn-more-btn';
     learnMoreButton.textContent = 'Learn More';
-    learnMoreButton.dataset.artistId = artist.idArtist;
-    card.appendChild(learnMoreButton);
+    learnMoreButton.dataset.artistId = artist._id;
 
-    return card;
+    const learnMoreIcon = document.createElement('svg');
+    learnMoreIcon.setAttribute('class', 'learn-more-icon');
+    learnMoreIcon.setAttribute('width', '8');
+    learnMoreIcon.setAttribute('height', '16');
+
+    const useElement = document.createElement('use');
+    useElement.setAttribute(
+        'href',
+        `${import.meta.env.BASE_URL}img/icons.svg#icon-filled-arrow`
+    );
+
+    learnMoreIcon.appendChild(useElement);
+    learnMoreButton.appendChild(learnMoreIcon);
+    li.appendChild(learnMoreButton);
+
+    return li;
 }
 
+// ==== MAIN FETCH AND DISPLAY ====
 async function loadArtistsDataAndDisplay() {
+    showLoader();
     try {
-        showLoader();
-
         if (offset === 0) {
             const data = await fetchArtists();
-
-            const artistsArray = Array.isArray(data)
-                ? data
-                : Array.isArray(data.artists)
-                    ? data.artists
-                    : null;
-
+            const artistsArray = Array.isArray(data?.artists) ? data.artists : null;
             if (!artistsArray) {
                 alert('Error: Received invalid data from server.');
-                loadMoreBtn?.classList.add('hidden');
-                loadMoreBtn?.setAttribute('disabled', true);
+                disableLoadMoreButton();
                 return;
             }
-
             allArtists = artistsArray;
+            artistsContainer.innerHTML = '';
         }
 
         const artistsToDisplay = allArtists.slice(offset, offset + limit);
-        artistsToDisplay.forEach(artist => {
-            const card = createCard(artist);
+        for (const artist of artistsToDisplay) {
+            const card = await createCard(artist);
             artistsContainer.appendChild(card);
-        });
+        }
 
         offset += limit;
 
-        console.log(`Loaded ${offset} of ${allArtists.length} artists`);
-
         if (offset >= allArtists.length) {
-            loadMoreBtn?.classList.add('hidden');
-            loadMoreBtn?.setAttribute('disabled', true);
+            disableLoadMoreButton();
         } else {
-            loadMoreBtn?.classList.remove('hidden');
-            loadMoreBtn?.removeAttribute('disabled');
+            enableLoadMoreButton();
         }
     } catch (error) {
         alert('Failed to load artists. Please try again later.');
-        loadMoreBtn?.classList.add('hidden');
-        loadMoreBtn?.setAttribute('disabled', true);
+        disableLoadMoreButton();
     } finally {
         hideLoader();
     }
 }
 
+// ==== INIT ====
 function initArtistSection() {
     artistsContainer = document.getElementById('artistsContainer');
     loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -132,22 +145,17 @@ function initArtistSection() {
     loadMoreBtn.onclick = loadArtistsDataAndDisplay;
     loadArtistsDataAndDisplay();
 
-    artistsContainer.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('learn-more-btn')) {
-            const artistId = e.target.dataset.artistId;
-            try {
-                const artistData = await fetchArtistById(artistId);
-                if (!artistData || !artistData.artists || !artistData.artists[0]) {
-                    alert('Artist details not found.');
-                    return;
-                }
-                // Тут лишається виклик без створення модалки
-                console.log('Artist details:', artistData.artists[0]);
-            } catch (error) {
-                alert('Failed to load artist details.');
-            }
+    artistsContainer.addEventListener('click', e => {
+        const button = e.target.closest('.learn-more-btn');
+        if (button) {
+            const artistId = button.dataset.artistId;
+            if (artistId) openArtistModal(artistId);
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initArtistSection();
+});
 
 export { initArtistSection };
